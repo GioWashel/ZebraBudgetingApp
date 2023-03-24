@@ -3,11 +3,10 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class IUCSVReader {
+public class IUCSVReader implements CSVReader{
 
 
     //list of void methods for printing the csv
-
     private static File file;
     private static Scanner sc;
     public IUCSVReader(File file) throws FileNotFoundException {
@@ -103,20 +102,18 @@ public class IUCSVReader {
                     amount = Double.parseDouble(transactionParts[6]);
                 }
             }
-            //if withdrawal, check if it's a payment or actual withdrawal
-            if(type.startsWith("\"W")) {
-                //if withdrawal contains XCTR, then it's a withdrawal
-                if(type.contains("XCTR")) {
-                    System.out.printf("Withdrawal %s %f\n", date, amount);
-                }
-                else {
-                    System.out.printf("Payment %s %s %f\n", date, place, amount);
-                }
-            }
-            //if transaction is a Deposit, print the amount
-            else if(type.startsWith("\"D")) {
+            if(type.startsWith("\"D")) {
                 System.out.printf("Deposit %s, %f\n", date, amount);
             }
+            //if withdrawal, check if it's a payment or actual withdrawal
+            else if(type.startsWith("\"W") && type.contains("XCTR")) {
+                //if withdrawal contains XCTR, then it's a withdrawal
+                System.out.printf("Withdrawal %s %f\n", date, amount);
+            }
+            else if(type.startsWith("\"W")) {
+                System.out.printf("Payment %s %s %f\n", date, place, amount);
+            }
+            //if transaction is a Deposit, print the amount
         }
     }
     public void totalDeposits() throws FileNotFoundException {
@@ -151,5 +148,9 @@ public class IUCSVReader {
             System.out.printf("Deposit %s %.2f\n", date, amount);
         }
         System.out.printf("Total of %d deposits totalling to: $%.2f\n", numOfDeposits, total);
+    }
+
+    public void totalWithdrawals() throws FileNotFoundException {
+
     }
 }
