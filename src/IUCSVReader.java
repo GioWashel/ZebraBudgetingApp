@@ -5,42 +5,42 @@ import java.util.Scanner;
 
 public class IUCSVReader implements CSVReader{
 
-
-    //list of void methods for printing the csv
+    //will handle a csv that is structured like
+    //Transaction Number,Date,Description,Memo,Amount Debit,Amount Credit,Balance,Check Number,Fees
     private static File file;
     private static Scanner sc;
+    private ArrayList<String[]> transactions = new ArrayList<>();
     public IUCSVReader(File file) throws FileNotFoundException {
         this.file = file;
         this.sc = new Scanner(file);
         sc.useDelimiter("\n");
+        //save all the lines of csv within transactions
+        while(sc.hasNext()) {
+            String line = sc.next();
+            String[] transaction = line.split(",");
+            transactions.add(transaction);
+        }
+    }
+    //prints the statement line by line
+    @Override
+    public void printCSV() {
+        System.out.println(transactions.toString());
     }
 
-    //prints the statement line by line
-    public void printCSV() throws FileNotFoundException {
-        sc = new Scanner(file);
-        sc.useDelimiter("\n");
-        while(sc.hasNext()) {
-            System.out.println(sc.next());
-        }
-    }
-    //filters the statement by a specific string contained in the line
-    public void filterBy(String s) throws FileNotFoundException {
-        sc = new Scanner(file);
-        int numFiltered = 0;
-        sc.useDelimiter("\n");
-        while(sc.hasNext()) {
-            String part = sc.next();
-            if(part.contains(s)) {
-                numFiltered++;
-                System.out.println(part);
+    @Override
+    public ArrayList<String[]> filterBy(String s) {
+        ArrayList<String[]> filtered = new ArrayList<>();
+        for(String[] transaction: transactions) {
+            if(transaction[0].equals(s) || transaction[1].equals(s) || transaction[2].equals(s) || transaction[3].equals(s) || transaction[4].equals(s) || transaction[5].equals(s) || transaction[6].equals(s)){
+                filtered.add(transaction);
             }
         }
-        System.out.printf("Total of %d instances of %s\n", numFiltered, s);
+        return filtered;
     }
-    //prints the total amount payed in bank statement (not including withdrawals)
-    public void totalAmountPayed() throws FileNotFoundException {
-        sc = new Scanner(file);
-        sc.useDelimiter("\n");
+    //prints the total amount paid in bank statement (not including withdrawals)
+
+    @Override
+    public double totalAmountPayed() {
         ArrayList<String> listOfPayments = new ArrayList<>();
         double total = 0;
         while(sc.hasNext()) {
@@ -59,7 +59,31 @@ public class IUCSVReader implements CSVReader{
         }
         total = total * -1;
         System.out.println(total);
+        return 0;
     }
+
+    @Override
+    public double totalAmountPayedBy(String filter) {
+        double amount = 0;
+        for(String[] transaction: filterBy(filter)) {
+            String amountDebit = transaction[4];
+            String amountCredit = transaction[5];
+            String balance = transaction[6];
+            try {
+                amount += Double.parseDouble(amountDebit);
+            }
+            catch(NumberFormatException e) {
+                try {
+                    amount += Double.parseDouble(amountCredit);
+                }
+                catch(NumberFormatException f) {
+                    amount +=Double.parseDouble(balance);
+                }
+            }
+        }
+        return amount;
+    }
+
     //formats csv properly for the app
     //removes garbage values and makes the statement readable
     // case 1: payment to a company
@@ -71,26 +95,24 @@ public class IUCSVReader implements CSVReader{
     // case 3: withdrawal
     //      ie "20230209000000[-5:EST]*-100.00*0**Withdrawal %%XCTR",02/09/2023,"Withdrawal %%XCTR","20222910000013991 WASHEL,GIOVANNI %% TCode01 CD 100.00",-100.00,,"92.05",,
     //      becomes 02/09/2023 Withdrawal $100
-    public void extractCSV() throws FileNotFoundException {
-        sc = new Scanner(file);
-        sc.useDelimiter("\n");
-        while(sc.hasNext()) {
-            String transaction = sc.next();
-            String[] transactionParts = transaction.split(",");
-            //if the line is a transaction, parse it
-            // ie, not first 4 lines of csv
-            if(transactionParts[0].startsWith("\"A") || transactionParts[0].startsWith("\"D") || transactionParts[0].startsWith("T")) {
-                continue;
-            }
-            String date = transactionParts[1];
-            String type = transactionParts[2];
-            String place = transactionParts[3];
-            String amountDebit = transactionParts[4];
-            String amountCredit = transactionParts[5];
+
+    @Override
+    public ArrayList<String[]> extractCSV() throws FileNotFoundException {
+        ArrayList<String[]> extracted = new ArrayList<>();
+        Categorizer categorizer = new Categorizer();
+        // find amount -> find type -> extractCategory -> return extracted amounts.
+        for(String[] transaction: transactions) {
+            String date = transaction[1];
+            String type = transaction[2];
+            String place = transaction[3];
+            String amountDebit = transaction[4];
+            String amountCredit = transaction[5];
+            String balance = transaction[6];
             double amount;
-            //check to see if amount is debit or credit
-            //if debit amount is empty or not number, set it equal to credit amount
-            //if credit is empty or not number, then set it equal to transactionParts[6];
+
+            //check to see if transaction was made with a debit or credit card
+            //if debit amount is empty, then a credit card was used
+            //else if credit is empty or not number, then set it equal to transactionParts[6] (balance);
             try {
                 amount = Double.parseDouble(amountDebit);
             }
@@ -99,9 +121,10 @@ public class IUCSVReader implements CSVReader{
                     amount = Double.parseDouble(amountCredit);
                 }
                 catch(NumberFormatException f) {
-                    amount = Double.parseDouble(transactionParts[6]);
+                    amount = Double.parseDouble(balance);
                 }
             }
+            //now lets check if the transaction was a deposit, withdrawal, or a payment
             if(type.startsWith("\"D")) {
                 System.out.printf("Deposit %s, %f\n", date, amount);
             }
@@ -113,44 +136,79 @@ public class IUCSVReader implements CSVReader{
             else if(type.startsWith("\"W")) {
                 System.out.printf("Payment %s %s %f\n", date, place, amount);
             }
-            //if transaction is a Deposit, print the amount
-        }
-    }
-    public void totalDeposits() throws FileNotFoundException {
-        sc = new Scanner(file);
-        sc.useDelimiter("\n");
-        double total = 0;
-        int numOfDeposits = 0;
-        while(sc.hasNext()) {
-            String transaction = sc.next();
-            String[] transactionParts = transaction.split(",");
-            if(transactionParts[0].startsWith("\"A") || transactionParts[0].startsWith("\"D") || transactionParts[0].startsWith("T")) {
-                continue;
+            String[] extractedTransaction = new String[3];
+            extractedTransaction[0] = date;
+            extractedTransaction[2] = String.valueOf(amount);
+            if(categorizer.getCategory(type).length != 0) {
+                extractedTransaction[1] = type;
             }
+            else if(categorizer.getCategory(place).length != 0) {
+                extractedTransaction[1] = place;
+            }
+            else {
+                extractedTransaction[1] = "Unknown";
+                //make it where the user can see the original statement so they can decide for themselves what category
+            }
+        }
+        return extracted;
+    }
+    @Override
+    public double sumDeposits() {
+        double amount = 0;
+        for(String[] transaction: transactions) {
+            String type = transaction[2];
+            String amountDebit = transaction[4];
+            String amountCredit = transaction[5];
+            String balance = transaction[6];
             //if not a deposit, then continue to next line
-            String type = transactionParts[2];
-            if(!type.contains("Deposit")) continue;
-            numOfDeposits++;
-            String date = transactionParts[1];
-            double amount;
-            try {
-                amount = Double.parseDouble(transactionParts[4]);
-            }
-            catch(NumberFormatException e) {
+            if (type.startsWith("D")) {
                 try {
-                    amount = Double.parseDouble(transactionParts[5]);
-                }
-                catch(NumberFormatException f) {
-                    amount = Double.parseDouble(transactionParts[6]);
+                    amount += Double.parseDouble(amountDebit);
+                } catch (NumberFormatException e) {
+                    try {
+                        amount += Double.parseDouble(amountCredit);
+                    } catch (NumberFormatException f) {
+                        amount += Double.parseDouble(balance);
+                    }
                 }
             }
-            total+=amount;
-            System.out.printf("Deposit %s %.2f\n", date, amount);
         }
-        System.out.printf("Total of %d deposits totalling to: $%.2f\n", numOfDeposits, total);
+        return amount;
+    }
+    @Override
+    public double sumWithdrawals() {
+        double amount = 0;
+        for(String[] transaction: transactions) {
+            String type = transaction[2];
+            String amountDebit = transaction[4];
+            String amountCredit = transaction[5];
+            String balance = transaction[6];
+            //if not a deposit, then continue to next line
+            if (type.startsWith("W")) {
+                try {
+                    amount += Double.parseDouble(amountDebit);
+                } catch (NumberFormatException e) {
+                    try {
+                        amount += Double.parseDouble(amountCredit);
+                    } catch (NumberFormatException f) {
+                        amount += Double.parseDouble(balance);
+                    }
+                }
+            }
+        }
+        return amount;
     }
 
-    public void totalWithdrawals() throws FileNotFoundException {
-
+    @Override
+    public double numOfPayments() {
+        return 0;
+    }
+    @Override
+    public double numOfWithdrawals() {
+        return 0;
+    }
+    @Override
+    public double numOfDeposits() {
+        return 0;
     }
 }
