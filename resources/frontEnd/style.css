@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+
+
+
+:root {
+	--dark-green: #517664;
+	--light-green: #8ce3a0;
+	--dark-blue: #001427;
+	--periwinkle: #D8DCFF;
+	--cordovan: #8E3B46;
+}
+	
+* {
+	margin: 0;
+	padding: 0;
+	font-family: 'Roboto Slab', serif;
+}
+
+body {
+	height: 100vh;
+	width: 100%;
+	background-image: linear-gradient(var(--dark-blue), var(--light-green));
+	
+}
+.container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+}
+.login-form{
+	position: relative;
+	background: white;
+	display: flex;
+	padding: 100px 100px 50px 100px;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 300px;
+	font-size: 14px;
+	border-radius: 5px;
+	margin-bottom: 30px;
+}
+.login-text {
+	position: absolute;
+	top: 9%;
+	margin-bottom: 30px;
+	border-bottom: 1px solid silver;	
+}
+
+input[type='text'].form-control,input[type='password'].form-control{
+	font-size: 16px;
+	outline: none;
+	border: 2px solid lightgray;
+	padding: 16px;
+	margin-bottom: 30px;
+	border-radius: 2px;
+	transition: all 0.3s ease;
+}
+input[type='text'].form-control:hover, input[type='password'].form-control:hover{
+	border: 2px solid var(--dark-blue)
+}
+
+input[type='text'].form-control:active, input[type='password'].form-control:active{
+	border: 2px solid var(--dark-blue)
+}
+input[type='text'].form-control:focus, input[type='password'].form-control:focus{
+	border: 2px solid var(--dark-blue)
+}
+label {
+	position: relative;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-size: 15px;
+	width: 78%;
+	margin-bottom: 30px;
+
+
+}
+label input[type="checkbox"] {
+	width: 15px;
+	height: 15px;
+	margin-right: 10px;
+	cursor: pointer;
+}
+
+.login-button {
+	outline:  lightgray;
+	width: 100%;
+	background-color: var(--light-green);
+	color: white;
+	display: block;
+	padding: 16px;
+	border: none;
+	text-transform: uppercase;
+	font-size: 16px;
+	margin-bottom: 30px;
+}
+.login-button:hover {
+	background-color: var(--dark-green);
+	translate: all 0.3s ease;
+}
+.login-seperator {
+	border-bottom: 1px solid silver;	
+	margin-bottom: 20px;
+	
+}
+#not-registered {
+	margin-bottom: 30px;
+	font-size: small;
+}
