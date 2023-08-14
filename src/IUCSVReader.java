@@ -100,6 +100,9 @@ public class IUCSVReader implements CSVReader{
     public ArrayList<String[]> extractCSV() throws FileNotFoundException {
         ArrayList<String[]> extracted = new ArrayList<>();
         Categorizer categorizer = new Categorizer();
+        if(transactions.size() == 0) {
+            System.out.println("empty file!");
+        }
         // find amount -> find type -> extractCategory -> return extracted amounts.
         for(String[] transaction: transactions) {
             String date = transaction[1];
@@ -136,6 +139,7 @@ public class IUCSVReader implements CSVReader{
             else if(type.startsWith("\"W")) {
                 System.out.printf("Payment %s %s %f\n", date, place, amount);
             }
+            /*
             String[] extractedTransaction = new String[3];
             extractedTransaction[0] = date;
             extractedTransaction[2] = String.valueOf(amount);
@@ -149,6 +153,8 @@ public class IUCSVReader implements CSVReader{
                 extractedTransaction[1] = "Unknown";
                 //make it where the user can see the original statement so they can decide for themselves what category
             }
+
+             */
         }
         return extracted;
     }

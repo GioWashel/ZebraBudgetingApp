@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Categorizer {
@@ -17,6 +18,7 @@ public class Categorizer {
     //ex. categoryMap.add("Spotify", "subscriptions");
     public void setUp() throws FileNotFoundException {
         //for each category file, add it to the category map
+
         //todo
     }
 
@@ -27,12 +29,6 @@ public class Categorizer {
     public boolean isRestaurant(String prefixMatch) {
         return categoryMap.get(prefixMatch).equals("Restaurant");
 
-    }
-    public boolean isBeverage(String prefixMatch) {
-        return categoryMap.get(prefixMatch).equals("beverage");
-    }
-    public boolean isOnlineClothing(String prefixMatch){
-        return categoryMap.get(prefixMatch).equals("onlineClothing");
     }
     public boolean isSubscription(String prefixMatch){
         return categoryMap.get(prefixMatch).equals("subscription");
@@ -55,8 +51,28 @@ public class Categorizer {
     //check if each subset is contained in each trie for the prefix search.
     //use trie to get the key, then use hashmap to get the category
         //if multiple matches, ask the user which one is right
-    public String[] getCategory(String transaction) {
+
+
+    //gets a percentage of how similar the strings are
+    public String get(String transaction) {
+        String match = "";
+        boolean end = false;
+        ArrayList<String> keys = getPossibleKeys(transaction);
+        for(String key: keys) {
+            while(end == false) {
+                transaction.
+            }
+        }
+        return match;
+    }
+    public ArrayList<String> getPossibleKeys(String transaction) {
+        ArrayList<String> categories = new ArrayList<>();
+        for(String key: categoryMap.keySet()) {
+            if(transaction.contains(key)) {
+                categories.add(key);
+            }
+        }
         //todo
-        return null;
+        return
     }
 }
