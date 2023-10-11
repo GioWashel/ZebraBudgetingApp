@@ -7,8 +7,6 @@ public interface CSVReader {
     //method will simply print all transactions
     void printCSV();
 
-    //method will organize transactions into a list
-    ArrayList<String[]> extractCSV() throws FileNotFoundException;
 
     //method which will return a list of transaction that include a specific string
     ArrayList<String[]> filterBy(String filter);
@@ -24,8 +22,14 @@ public interface CSVReader {
 
     //method which will sum all the withdrawals made
     double  sumWithdrawals();
+
+    //returns total number of transactions that cost the user
     double numOfPayments();
+
+    //returns total number of withdrawals a user made
     double numOfWithdrawals();
+
+    //returns total number of deposits a user made
     double numOfDeposits();
 
 }

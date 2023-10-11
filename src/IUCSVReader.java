@@ -96,10 +96,10 @@ public class IUCSVReader implements CSVReader{
     //      ie "20230209000000[-5:EST]*-100.00*0**Withdrawal %%XCTR",02/09/2023,"Withdrawal %%XCTR","20222910000013991 WASHEL,GIOVANNI %% TCode01 CD 100.00",-100.00,,"92.05",,
     //      becomes 02/09/2023 Withdrawal $100
 
-    @Override
+
     public ArrayList<String[]> extractCSV() throws FileNotFoundException {
         ArrayList<String[]> extracted = new ArrayList<>();
-        Categorizer categorizer = new Categorizer();
+        IUCUCategorizer categorizer = new IUCUCategorizer();
         if(transactions.size() == 0) {
             System.out.println("empty file!");
         }
